@@ -1,0 +1,396 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<xwikidoc>
+<web>XWiki</web>
+<name>Xuake</name>
+<language></language>
+<defaultLanguage>en</defaultLanguage>
+<translation>0</translation>
+<parent></parent>
+<creator>xwiki:XWiki.jvelo</creator>
+<author>xwiki:XWiki.jvelo</author>
+<customClass></customClass>
+<contentAuthor>xwiki:XWiki.jvelo</contentAuthor>
+<creationDate>1339772364000</creationDate>
+<date>1339795613000</date>
+<contentUpdateDate>1339795613000</contentUpdateDate>
+<version>12.35</version>
+<title></title>
+<template></template>
+<defaultTemplate></defaultTemplate>
+<validationScript></validationScript>
+<comment></comment>
+<minorEdit>true</minorEdit>
+<syntaxId>xwiki/2.1</syntaxId>
+<hidden>false</hidden>
+<object>
+<class>
+<name>XWiki.JavaScriptExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.Xuake</name>
+<number>0</number>
+<className>XWiki.JavaScriptExtension</className>
+<guid>ee4e3f1f-7d29-4f27-b283-e7375018a9f6</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>var Xuake = Class.create({
+
+  options: {
+    triggerKey: "F10"
+  },
+
+  templates: {
+    result: "&lt;div id='xuake-console-result' class='console-result'&gt; \
+               &lt;ul class='tabs nav-tabs xwikitabbar'&gt; \
+                 &lt;li class='executionResult active'&gt;&lt;a href='#'&gt;Result&lt;/a&gt;&lt;/li&gt; \
+                 &lt;li class='outputText'&gt;&lt;a href='#'&gt;Output&lt;/a&gt;&lt;/li&gt; \
+                 &lt;li class='stacktraceText'&gt;&lt;a href='#'&gt;Stacktrace&lt;/a&gt;&lt;/li&gt; \
+               &lt;/ul&gt; \
+               &lt;div class='content xwikitabpanescontainer code'&gt;&lt;/div&gt; \
+             &lt;/div&gt; \
+             &lt;div class='clearfix clearfloats'&gt;&lt;/div&gt;"
+  },
+
+  initialize: function(configuration, ace) {
+    this.options = Object.clone(Object.extend(this.options, configuration));
+    this.ace = ace;
+
+    this.executorUrl = new XWiki.Document("GroovyConsoleExecutor", "XWiki").getURL("get", "xpage=plain&amp;outputSyntax=plain");
+
+    // Construct and inject the console DOM fragment
+    this.injectConsole();
+    
+    // Initialize the Ace editor
+    window.editor = this.editor = this.ace.edit(this.input);
+    this.editor.setTheme("theme-pastel_on_dark.js");
+    var GroovyMode = require("ace/mode/groovy").Mode;
+    this.editor.session.setMode(new GroovyMode());
+
+    // Bind the shortcut to the console toggle
+    shortcut.add(this.options.triggerKey, function(event){
+      event.stop();
+      this.toggleConsole();
+    }.bind(this));
+  },
+
+  injectConsole: function() {
+    this.console = new Element("div", {
+        id: "xuake-console"
+      , class: "xuake-console hidden"
+    });
+    this.input = new Element("div", {
+        id: "xuake-console-input"
+      , class: "consoleInput"
+    })
+    this.executeButton = new Element("input", {
+        id: "xuake-execute-button"
+      , class: "btn btn-info button"
+      , type: "button"
+      , value: "Execute (CTRL + E)" 
+    })
+    this.console.insert(this.input);
+    this.console.insert(this.executeButton);
+    this.console.insert(this.templates.result);
+    this.executeButton.observe("click", this.onExecute.bind(this));
+    shortcut.add("Ctrl+E", this.onExecute.bind(this));
+
+    $$("body")[0].insert(this.console);
+
+    this.resultContainer = this.console.down(".console-result");
+    this.resultContent = this.resultContainer.down(".content");
+    ["executionResult", "outputText", "stacktraceText"].each(function(item){
+      this.resultContainer.down("ul.tabs li." + item).observe("click", function(){
+
+      }.bind(this));
+    }.bind(this));
+  },
+
+  activateTab: function(tab) {
+    this.resultContainer.select("ul.tabs li").invoke("removeClassName", "active");
+    this.resultContainer.down("ul.tabs li." + tab).addClassName("active");
+    if (this.lastResult &amp;&amp; this.lastResult[tab]) {
+      this.resultContent.innerHTML = this.lastResult[tab].escapeHTML();
+    }
+    else {
+      this.resultContent.innerHTML = "";
+    }
+  },
+
+  onExecute: function() {
+    var request = new Ajax.Request(this.executorUrl, {
+      method: "POST",
+      parameters: { script: this.editor.getValue() },
+      requestHeaders: {Accept: 'application/json'},
+      onComplete: function(response) {
+        this.lastResult = response.responseJSON;
+        this.activateTab("executionResult");
+      }.bind(this)
+    });
+  },
+
+  toggleConsole: function(){
+    this.console.toggleClassName("hidden");
+    if (!this.console.hasClassName("hidden")) {
+      this.input.down("textarea").focus();
+      this.editor.focus();
+    }
+  }
+
+});
+
+document.observe("dom:loaded", function(){
+
+  var   aceDocument = new XWiki.Document("Ace", "XWiki")
+      , hasAce = false
+      , hasModeGroovy = false
+      , isInitialized = false;
+
+  var init = function(ace){
+    var xuake = new Xuake({}, ace);
+    isInitialized = true;
+  };
+
+  // Ace
+
+  var script = new Element("script", {
+    src: aceDocument.getURL("download") + "/ace.zip/ace.js",
+    type: "text/javascript"
+  });
+
+  script.addEventListener('load', function (e) {
+    hasAce = true;
+    if (!isInitialized &amp;&amp; hasModeGroovy) { 
+      init(ace);
+    }
+  }, false);
+
+  $$("head")[0].insert({ bottom: script });
+
+  // Groovy mode
+
+  var script = new Element("script", {
+    src: aceDocument.getURL("download") + "/ace.zip/mode-groovy.js",
+    type: "text/javascript"
+  });
+
+  script.addEventListener('load', function (e) {
+    hasModeGroovy = true;
+    if (!isInitialized &amp;&amp; hasAce) { 
+      init(ace);
+    }
+  }, false);
+
+
+  $$("head")[0].insert({ bottom: script });
+
+});</code>
+</property>
+<property>
+<name></name>
+</property>
+<property>
+<parse>0</parse>
+</property>
+<property>
+<use>always</use>
+</property>
+</object>
+<object>
+<class>
+<name>XWiki.StyleSheetExtension</name>
+<customClass></customClass>
+<customMapping></customMapping>
+<defaultViewSheet></defaultViewSheet>
+<defaultEditSheet></defaultEditSheet>
+<defaultWeb></defaultWeb>
+<nameField></nameField>
+<validationScript></validationScript>
+<cache>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>cache</name>
+<number>5</number>
+<prettyName>Caching policy</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>long|short|default|forbid</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</cache>
+<code>
+<disabled>0</disabled>
+<name>code</name>
+<number>2</number>
+<prettyName>Code</prettyName>
+<rows>20</rows>
+<size>50</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.TextAreaClass</classType>
+</code>
+<name>
+<disabled>0</disabled>
+<name>name</name>
+<number>1</number>
+<prettyName>Name</prettyName>
+<size>30</size>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.StringClass</classType>
+</name>
+<parse>
+<disabled>0</disabled>
+<displayFormType>select</displayFormType>
+<displayType>yesno</displayType>
+<name>parse</name>
+<number>4</number>
+<prettyName>Parse content</prettyName>
+<unmodifiable>0</unmodifiable>
+<classType>com.xpn.xwiki.objects.classes.BooleanClass</classType>
+</parse>
+<use>
+<cache>0</cache>
+<disabled>0</disabled>
+<displayType>select</displayType>
+<multiSelect>0</multiSelect>
+<name>use</name>
+<number>3</number>
+<prettyName>Use this extension</prettyName>
+<relationalStorage>0</relationalStorage>
+<separator> </separator>
+<separators> ,|</separators>
+<size>1</size>
+<unmodifiable>0</unmodifiable>
+<values>currentPage=Always on this page|onDemand=On demand|always=Always on this wiki</values>
+<classType>com.xpn.xwiki.objects.classes.StaticListClass</classType>
+</use>
+</class>
+<name>XWiki.Xuake</name>
+<number>0</number>
+<className>XWiki.StyleSheetExtension</className>
+<guid>ec3f066d-6590-4c37-9ac3-24eb5bec858c</guid>
+<property>
+<cache>long</cache>
+</property>
+<property>
+<code>#xuake-console, #xuake-console * {
+  box-sizing: border-box;
+}
+
+#xuake-console {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 350px;
+  z-index: 10000;
+  background: white;/*#3B1A01;*/
+  opacity: 0.95;
+  border-top: 4px solid #ddd;
+}
+
+#xuake-console-input {
+  position: relative;
+  height: 100%;
+  width: 700px;
+  float: left;
+}
+
+#xuake-execute-button {
+  position: fixed;
+  left: 525px;
+  bottom: 3px;
+  position: fixed;
+}
+
+#xuake-console-result .xwikitabpanescontainer {
+  background: white;
+  border: none;
+  padding: 5px;
+  font-size: 15px;
+  white-space: pre-wrap;
+  height: 316px;
+  overflow: auto;
+}</code>
+</property>
+<property>
+<name>Xuake</name>
+</property>
+<property>
+<parse>0</parse>
+</property>
+<property>
+<use>always</use>
+</property>
+</object>
+<content></content></xwikidoc>
