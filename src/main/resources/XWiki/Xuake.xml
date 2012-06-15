@@ -11,9 +11,9 @@
 <customClass></customClass>
 <contentAuthor>xwiki:XWiki.jvelo</contentAuthor>
 <creationDate>1339772364000</creationDate>
-<date>1339795613000</date>
-<contentUpdateDate>1339795613000</contentUpdateDate>
-<version>12.35</version>
+<date>1339800593000</date>
+<contentUpdateDate>1339800593000</contentUpdateDate>
+<version>12.56</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -109,15 +109,17 @@
   },
 
   templates: {
-    result: "&lt;div id='xuake-console-result' class='console-result'&gt; \
-               &lt;ul class='tabs nav-tabs xwikitabbar'&gt; \
-                 &lt;li class='executionResult active'&gt;&lt;a href='#'&gt;Result&lt;/a&gt;&lt;/li&gt; \
-                 &lt;li class='outputText'&gt;&lt;a href='#'&gt;Output&lt;/a&gt;&lt;/li&gt; \
-                 &lt;li class='stacktraceText'&gt;&lt;a href='#'&gt;Stacktrace&lt;/a&gt;&lt;/li&gt; \
-               &lt;/ul&gt; \
-               &lt;div class='content xwikitabpanescontainer code'&gt;&lt;/div&gt; \
-             &lt;/div&gt; \
-             &lt;div class='clearfix clearfloats'&gt;&lt;/div&gt;"
+      result: "&lt;div id='xuake-console-result' class='console-result'&gt; \
+                 &lt;ul class='tabs nav-tabs xwikitabbar'&gt; \
+                   &lt;li class='executionResult active'&gt;&lt;a href='#'&gt;Result&lt;/a&gt;&lt;/li&gt; \
+                   &lt;li class='outputText'&gt;&lt;a href='#'&gt;Output&lt;/a&gt;&lt;/li&gt; \
+                   &lt;li class='stacktraceText'&gt;&lt;a href='#'&gt;Stacktrace&lt;/a&gt;&lt;/li&gt; \
+                 &lt;/ul&gt; \
+                 &lt;div class='content xwikitabpanescontainer code'&gt;&lt;/div&gt; \
+               &lt;/div&gt; \
+               &lt;div class='clearfix clearfloats'&gt;&lt;/div&gt;"
+
+    , error: "&lt;div class='errormessage alert alert-error'&gt;#{error}&lt;/div&gt;"
   },
 
   initialize: function(configuration, ace) {
@@ -128,7 +130,8 @@
 
     // Construct and inject the console DOM fragment
     this.injectConsole();
-    
+    this.prepareResultContainer();    
+
     // Initialize the Ace editor
     window.editor = this.editor = this.ace.edit(this.input);
     this.editor.setTheme("theme-pastel_on_dark.js");
@@ -164,12 +167,14 @@
     shortcut.add("Ctrl+E", this.onExecute.bind(this));
 
     $$("body")[0].insert(this.console);
+  },
 
+  prepareResultContainer: function() {
     this.resultContainer = this.console.down(".console-result");
     this.resultContent = this.resultContainer.down(".content");
     ["executionResult", "outputText", "stacktraceText"].each(function(item){
       this.resultContainer.down("ul.tabs li." + item).observe("click", function(){
-
+        this.activateTab(item);
       }.bind(this));
     }.bind(this));
   },
@@ -192,7 +197,16 @@
       requestHeaders: {Accept: 'application/json'},
       onComplete: function(response) {
         this.lastResult = response.responseJSON;
-        this.activateTab("executionResult");
+        if (response.status != 200) {
+          this.activateTab("executionResult");
+          this.resultContent.innerHTML = this.templates.error.interpolate(this.lastResult);
+        } else {
+          var tabToActivate = "executionResult"
+          if (this.lastResult.stacktraceText &amp;&amp; this.lastResult.stacktraceText != "") {
+             tabToActivate = "stacktraceText";
+          }
+          this.activateTab(tabToActivate);
+        }
       }.bind(this)
     });
   },
@@ -381,6 +395,19 @@ document.observe("dom:loaded", function(){
   white-space: pre-wrap;
   height: 316px;
   overflow: auto;
+}
+
+body.lyrebird #xuake-console-result ul.tabs {
+  border:none;
+}
+
+body.lyrebird #xuake-console-result ul.tabs:before {
+  display: inline-block;
+}
+
+body.lyrebird #xuake-console-result ul.tabs:after {
+  display: inline-block;
+  margin-bottom: 35px;
 }</code>
 </property>
 <property>

@@ -11,9 +11,9 @@
 <customClass></customClass>
 <contentAuthor>xwiki:XWiki.jvelo</contentAuthor>
 <creationDate>1241713705000</creationDate>
-<date>1339794645000</date>
-<contentUpdateDate>1339794645000</contentUpdateDate>
-<version>2.8</version>
+<date>1339799035000</date>
+<contentUpdateDate>1339799035000</contentUpdateDate>
+<version>2.13</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -96,8 +96,9 @@ println """{{{ ${builder.toString()} }}}"""
 }
 
 else if (!xwiki.hasAccessLevel("programming", doc.fullName)) {
+   response.contentType = "application/json"
    response.setStatus(403)
-   println "You don't have programming access"
+   println new groovy.json.JsonBuilder([error: "You don't have programming access"]).toString()
 }
 else {
    println "This is a groovy executor"
