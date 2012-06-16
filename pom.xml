@@ -12,6 +12,18 @@
   <version>1.0-SNAPSHOT</version>
   <packaging>xar</packaging>
   <description>An application to execute groovy scripts from your wiki web interface</description>
+  <scm>
+    <connection>scm:git:git://github.com/jvelo/xwiki-groovy-console.git</connection>
+    <developerConnection>scm:git:git@github.com:jvelo/xwiki-groovy-console.git</developerConnection>
+    <url>https://github.com/jvelo/xwiki-groovy-console</url>
+  </scm>
+  <distributionManagement>
+    <repository>
+      <id>xwiki-staging</id>
+      <name>XWiki Staging Repository</name>
+      <url>http://nexus.xwiki.org/nexus/service/local/staging/deploy/maven2/</url>
+    </repository>
+  </distributionManagement>
   <dependencies>
     <dependency>
       <groupId>org.xwiki.contrib</groupId>
