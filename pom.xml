@@ -9,7 +9,7 @@
   <groupId>org.xwiki.contrib</groupId>
   <artifactId>xwiki-application-groovy-console</artifactId>
   <name>XWiki Contrib - Application - Groovy Console</name>
-  <version>1.0-SNAPSHOT</version>
+  <version>2.0</version>
   <packaging>xar</packaging>
   <description>An application to execute groovy scripts from your wiki web interface</description>
   <scm>
