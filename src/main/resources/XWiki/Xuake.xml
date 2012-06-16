@@ -11,9 +11,9 @@
 <customClass></customClass>
 <contentAuthor>xwiki:XWiki.jvelo</contentAuthor>
 <creationDate>1339772364000</creationDate>
-<date>1339844204000</date>
-<contentUpdateDate>1339844204000</contentUpdateDate>
-<version>14.1</version>
+<date>1339845510000</date>
+<contentUpdateDate>1339845510000</contentUpdateDate>
+<version>15.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -134,7 +134,7 @@
 
     // Initialize the Ace editor
     window.editor = this.editor = this.ace.edit(this.input);
-    this.editor.setTheme("theme-pastel_on_dark.js");
+    // this.editor.setTheme("theme-pastel_on_dark.js");
     var GroovyMode = require("ace/mode/groovy").Mode;
     this.editor.session.setMode(new GroovyMode());
 
@@ -227,14 +227,7 @@
 document.observe("dom:loaded", function(){
 
   var   aceDocument = new XWiki.Document("Ace", "XWiki")
-      , hasAce = false
-      , hasModeGroovy = false
-      , isInitialized = false;
-
-  var init = function(ace){
-    var xuake = new Xuake({}, ace);
-    isInitialized = true;
-  };
+      , init = function(ace) { var xuake = new Xuake({}, ace); };
 
   // Ace
 
@@ -244,30 +237,21 @@ document.observe("dom:loaded", function(){
   });
 
   script.addEventListener('load', function (e) {
-    hasAce = true;
-    if (!isInitialized &amp;&amp; hasModeGroovy) { 
+
+    // Groovy mode
+    var script = new Element("script", {
+      src: aceDocument.getURL("download") + "/ace.zip/mode-groovy.js",
+      type: "text/javascript"
+    });
+    script.addEventListener('load', function (e) {
       init(ace);
-    }
+    }, false);
+    $$("head")[0].insert({ bottom: script });
+
   }, false);
 
   $$("head")[0].insert({ bottom: script });
 
-  // Groovy mode
-
-  var script = new Element("script", {
-    src: aceDocument.getURL("download") + "/ace.zip/mode-groovy.js",
-    type: "text/javascript"
-  });
-
-  script.addEventListener('load', function (e) {
-    hasModeGroovy = true;
-    if (!isInitialized &amp;&amp; hasAce) { 
-      init(ace);
-    }
-  }, false);
-
-
-  $$("head")[0].insert({ bottom: script });
 
 });</code>
 </property>
