@@ -7,9 +7,9 @@
 <translation>0</translation>
 <parent>XWiki.WebHome</parent>
 <creator>XWiki.Admin</creator>
-<author>xwiki:XWiki.jvelo</author>
+<author>xwiki:XWiki.Admin</author>
 <customClass></customClass>
-<contentAuthor>xwiki:XWiki.jvelo</contentAuthor>
+<contentAuthor>xwiki:XWiki.Admin</contentAuthor>
 <creationDate>1241713705000</creationDate>
 <date>1339844240000</date>
 <contentUpdateDate>1339844240000</contentUpdateDate>

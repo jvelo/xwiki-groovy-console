@@ -7,13 +7,13 @@
 <translation>0</translation>
 <parent></parent>
 <creator>xwiki:XWiki.jvelo</creator>
-<author>xwiki:XWiki.jvelo</author>
+<author>xwiki:XWiki.Admin</author>
 <customClass></customClass>
-<contentAuthor>xwiki:XWiki.jvelo</contentAuthor>
+<contentAuthor>xwiki:XWiki.Admin</contentAuthor>
 <creationDate>1339772364000</creationDate>
-<date>1339845510000</date>
-<contentUpdateDate>1339845510000</contentUpdateDate>
-<version>15.1</version>
+<date>1340142268000</date>
+<contentUpdateDate>1340142268000</contentUpdateDate>
+<version>16.1</version>
 <title></title>
 <template></template>
 <defaultTemplate></defaultTemplate>
@@ -148,15 +148,15 @@
   injectConsole: function() {
     this.console = new Element("div", {
         id: "xuake-console"
-      , class: "xuake-console hidden"
+      , "class": "xuake-console hidden"
     });
     this.input = new Element("div", {
         id: "xuake-console-input"
-      , class: "consoleInput"
+      , "class": "consoleInput"
     })
     this.executeButton = new Element("input", {
         id: "xuake-execute-button"
-      , class: "btn btn-info button"
+      , "class": "btn btn-info button"
       , type: "button"
       , value: "Execute (CTRL + E)" 
     })
